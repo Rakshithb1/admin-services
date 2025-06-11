@@ -53,6 +53,11 @@ ARG container_user_uid=1002
 # can be passed during Docker build as build time environment for github branch to pickup configuration from.
 ARG container_user_gid=1001
 
+# OpenTelemetry configuration
+ENV OTEL_SERVICE_NAME=admin-service
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://my-release-signoz-otel-collector.plat.svc.cluster.local:4318
+ENV JAVA_TOOL_OPTIONS="-javaagent:/otel/opentelemetry-javaagent.jar"
+
 # install packages and create user
 RUN apk -q update \
 && apk add -q unzip wget \
@@ -66,9 +71,14 @@ ENV work_dir=/home/${container_user}
 
 ARG loader_path=${work_dir}/additional_jars/
 
-RUN mkdir -p ${loader_path}
+#RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
+
+RUN mkdir -p ${loader_path} /otel
+
+# Add OpenTelemetry Java agent
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /otel/opentelemetry-javaagent.jar
 
 COPY ./target/admin-service-*.jar admin-service.jar
 
