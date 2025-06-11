@@ -71,14 +71,15 @@ ENV work_dir=/home/${container_user}
 
 ARG loader_path=${work_dir}/additional_jars/
 
-#RUN mkdir -p ${loader_path}
+RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
 
 RUN mkdir -p ${loader_path} /otel
 
-# Add OpenTelemetry Java agent
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /otel/opentelemetry-javaagent.jar
+# Download OpenTelemetry Java agent
+RUN wget -q https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar \
+    -O /otel/opentelemetry-javaagent.jar
 
 COPY ./target/admin-service-*.jar admin-service.jar
 
